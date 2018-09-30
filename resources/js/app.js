@@ -1,3 +1,4 @@
+import Routes from './routes.js';
 
 /**
  * First we will load all of this project's JavaScript dependencies which
@@ -14,9 +15,29 @@ window.Vue = require('vue');
  * the page. Then, you may begin adding components to this application
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
+export const eventBus = new Vue();
 
-Vue.component('example-component', require('./components/ExampleComponent.vue'));
+import VueRouter from 'vue-router';
+import Layout from './components/Layout.vue';
+
+Vue.use(VueRouter);
+
+
+Routes.beforeEach( (to, from, next) => {
+	var Logged = localStorage.getItem('logged');
+
+	if ( !to.meta.guest && !Logged ) {
+		eventBus.$emit('logout');
+		return next({path:'/login'});
+	} else if(to.meta.guest && Logged) {
+		
+		return next({path:'/'});
+	}
+	return next();
+});
 
 const app = new Vue({
-    el: '#app'
+    el: '#app',
+    router : Routes,
+    render:h => h(Layout)
 });
